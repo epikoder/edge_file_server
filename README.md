@@ -1,4 +1,6 @@
-# prep50exams_bun
+# Edge Runtime File Server
+
+Use Bun server to access local files on Edge Runtime application
 
 To install dependencies:
 
