@@ -1,7 +1,7 @@
 import { rm } from "fs";
 
-const parseFileName = (f: string): string =>
-  (!import.meta.main ? "./" : import.meta.dir + "/") + f;
+const parseFileName = (f?: string): string =>
+  (!import.meta.main ? "" : import.meta.dir + "/") + (f || "");
 const decodeRequest = (v: string): NodeFileRequest => {
   let r: NodeFileRequest = {
     action: "nil",
@@ -41,13 +41,13 @@ const server = Bun.serve({
     log(
       rq.action,
       "[FILE: ",
-      rq.file,
+      parseFileName(rq.file),
       "]",
       "[DESTINATION: ",
-      rq.destination,
+      parseFileName(rq.destination),
       "]",
       "[SOURCE: ",
-      rq.source,
+      parseFileName(rq.source),
       "]"
     );
     switch (rq.action) {
