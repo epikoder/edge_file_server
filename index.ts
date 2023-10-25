@@ -22,7 +22,7 @@ const log: Console["log"] = (...any) => {
 };
 
 const server = Bun.serve({
-  port: process.env.FILE_SERVER_PORT || 3001,
+  port: process.env.FILE_SERVER_PORT || 3000,
   async fetch(req) {
     if (req.method !== "POST")
       return new Response(
@@ -176,7 +176,7 @@ const server = Bun.serve({
         );
     }
   },
-  hostname: "127.0.0.1",
+  hostname: process.env.FILE_SERVER_LOCAL ? "127.0.0.1" : "0.0.0.0",
 });
 console.log(`File Server:: Listening on localhost:${server.port}`);
 
