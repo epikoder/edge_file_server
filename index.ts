@@ -41,7 +41,9 @@ const server = Bun.serve({
     log(
       rq.action,
       "[FILE: ",
-      parseFileName(rq.file),
+      rq.action === "write" && rq.source === "data"
+        ? rq.file.slice(0, 99) + (rq.file.length > 100 ? "[TRUNCATED]" : "")
+        : parseFileName(rq.file),
       "]",
       "[DESTINATION: ",
       parseFileName(rq.destination),
