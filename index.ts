@@ -1,32 +1,24 @@
 import { rm } from "fs";
 
-type FileType = "local" | "data";
-interface NodeFileRequest {
-  file: string;
-  destination?: string;
-  type?: FileType;
-  action: "copy" | "write" | "read" | "remove";
-}
-interface NodeFileError {
-  status: number;
-  code: number;
-  message: string;
-}
-
-interface NodeFileResponse {
-  status: boolean;
-  error?: NodeFileError;
-  data?: {
-    type: "string" | "blob";
-    file: string | ArrayBuffer;
-  };
-  meta?: { [k: string]: any };
-}
-
 const parseFileName = (f: string): string =>
   (!import.meta.main ? "./" : import.meta.dir + "/") + f;
+const decodeRequest = (v: string): NodeFileRequest => {
+  let r: NodeFileRequest = {
+    action: "nil",
+    file: "",
+  };
+  try {
+    r = JSON.parse(v) as NodeFileRequest;
+  } catch (e) {}
+  return r;
+};
 const encodeResponse = (r: NodeFileResponse): string => {
   return JSON.stringify(r);
+};
+const log: Console["log"] = (...any) => {
+  if (process.env.FILE_SERVER_DEBUG) {
+    console.log(...any);
+  }
 };
 
 const server = Bun.serve({
@@ -45,7 +37,19 @@ const server = Bun.serve({
         { status: 405 }
       );
 
-    const rq = <NodeFileRequest>await req.json();
+    const rq = decodeRequest(await req.text());
+    log(
+      rq.action,
+      "[FILE: ",
+      rq.file,
+      "]",
+      "[DESTINATION: ",
+      rq.destination,
+      "]",
+      "[SOURCE: ",
+      rq.source,
+      "]"
+    );
     switch (rq.action) {
       case "copy": {
         if (!rq.destination)
@@ -107,12 +111,12 @@ const server = Bun.serve({
         try {
           await Bun.write(
             dstName,
-            rq.type === "data"
+            rq.source === "data"
               ? rq.file
               : await Bun.file(parseFileName(rq.file)).arrayBuffer()
           );
         } catch (e) {
-          console.log("FILE SERVER::", e);
+          log("FILE SERVER::", e);
         }
         return new Response(
           encodeResponse({
@@ -139,8 +143,8 @@ const server = Bun.serve({
           encodeResponse({
             status: true,
             data: {
-              type: "blob",
-              file: await file.arrayBuffer(),
+              type: "string",
+              file: await file.text(),
             },
           })
         );
@@ -160,21 +164,30 @@ const server = Bun.serve({
         );
       }
       default:
-        return new Response("Welcome to Bun!");
+        return new Response(
+          encodeResponse({
+            status: false,
+            meta: {
+              message: "Welcome to Edge Runtime File Server",
+            },
+          })
+        );
     }
   },
   hostname: "127.0.0.1",
 });
 console.log(`File Server:: Listening on localhost:${server.port}`);
 
-const app = Bun.spawn(["node", "server.js"], {
-  cwd: "./",
-  env: { ...process.env },
-  onExit(proc, exitCode, signalCode, error) {
-    console.log("Process Terminated:: ", error ?? "");
-  },
-});
+if (await Bun.file("server.js").exists()) {
+  const app = Bun.spawn(["node", "server.js"], {
+    cwd: "./",
+    env: { ...process.env },
+    onExit(proc, exitCode, signalCode, error) {
+      console.log("Process Terminated:: ", error ?? "");
+    },
+  });
 
-for await (const std of app.stdout) {
-  console.log(new TextDecoder().decode(std));
+  for await (const std of app.stdout) {
+    console.log(new TextDecoder().decode(std));
+  }
 }
