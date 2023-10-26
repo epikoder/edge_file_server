@@ -1,7 +1,10 @@
 import { rm } from "fs";
 
-const parseFileName = (f?: string): string =>
-  (!import.meta.main ? "" : import.meta.dir + "/") + (f || "");
+const parseFileName = (f?: string): string => {
+  return (
+    (import.meta.dir.length === 0 ? "" : import.meta.dir + "/") + (f || "")
+  );
+};
 const decodeRequest = (v: string): NodeFileRequest => {
   let r: NodeFileRequest = {
     action: "nil",
