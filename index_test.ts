@@ -2,7 +2,7 @@ const uri = "http://127.0.0.1:" + (process.env.FILE_SERVER_PORT || "3001");
 
 let test: NodeFileRequest["action"][] = ["copy", "write", "read", "remove"];
 const destination = "storage/logo/saved.txt";
-const file = "tmp/randomfile.png";
+const file = "tmp/randomfile.txt";
 for (const t of test) {
   let req: NodeFileRequest = {
     action: t,
@@ -12,7 +12,8 @@ for (const t of test) {
         : t === "read" || t === "remove"
         ? destination
         : file,
-    destination,
+    destination:
+      t === "write" ? destination.replace(".txt", "_write.txt") : destination,
     source: t === "write" ? "data" : "local",
   };
 

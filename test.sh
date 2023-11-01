@@ -1,6 +1,7 @@
 # !/bin/sh
 
-export FILE_SERVER_DEBUG=true
+export FILE_SERVER_DEBUG=1
+export FILE_SERVER_PORT=3000
 ENV="cloud"
 if [[ ! -z "$1" ]]; then 
     ENV=$1
@@ -10,12 +11,13 @@ fi
 mkdir -p tmp
 mkdir -p storage/logo
 touch tmp/randomfile.txt
+echo "Just A randomFile" > tmp/randomfile.txt
+APP_NAME=edge_file_server
 
 
 # Begin
-APP_NAME=edge_file_server
+
 if [[ $ENV = "cloud" ]]; then
-echo $1
     # Compile index.ts
     bun build --compile index.ts --outfile $APP_NAME
     ./$APP_NAME  &
