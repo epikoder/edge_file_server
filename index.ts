@@ -1,9 +1,9 @@
-import { rm } from "fs";
+import { mkdir, rm } from "fs";
+import { exit } from "process";
 
+const dir = () => (import.meta.dir.length === 0 ? "" : import.meta.dir + "/");
 const parseFileName = (f?: string): string => {
-  return (
-    (import.meta.dir.length === 0 ? "" : import.meta.dir + "/") + (f || "")
-  );
+  return dir() + (f || "");
 };
 const decodeRequest = (v: string): NodeFileRequest => {
   let r: NodeFileRequest = {
@@ -110,6 +110,25 @@ const _delete = async (rq: NodeFileRequest) => {
     })
   );
 };
+
+const path = process.env.STORAGE_PATH || "storage";
+mkdir(path, (err) => {
+  if (err && err.errno !== -17) {
+    console.error(err);
+    exit(1);
+  }
+});
+
+console.log(path);
+const dirs = ["/avatars", "/logo", "/questions"];
+for (const d of dirs) {
+  mkdir(path + d, (err) => {
+    if (err && err.errno !== -17) {
+      console.error(err);
+      exit(1);
+    }
+  });
+}
 
 const server = Bun.serve({
   port: process.env.FILE_SERVER_PORT || 3000,

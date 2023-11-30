@@ -2,6 +2,7 @@
 
 export FILE_SERVER_DEBUG=1
 export FILE_SERVER_PORT=3000
+export STORAGE_PATH=storage
 ENV="cloud"
 if [[ ! -z "$1" ]]; then 
     ENV=$1
@@ -9,7 +10,7 @@ fi
 
 # Setup
 mkdir -p tmp
-mkdir -p storage/logo
+mkdir -p storage
 touch tmp/randomfile.txt
 echo "Just A randomFile" > tmp/randomfile.txt
 APP_NAME=edge_file_server
