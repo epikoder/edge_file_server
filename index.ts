@@ -119,7 +119,7 @@ mkdir(path, (err) => {
   }
 });
 
-console.log(path);
+console.log("STORAGE-DIR::", dir() + path);
 const dirs = ["/avatars", "/logo", "/questions"];
 for (const d of dirs) {
   mkdir(path + d, (err) => {
@@ -129,6 +129,7 @@ for (const d of dirs) {
     }
   });
 }
+console.log("STORAGE-SETUP-DONE");
 
 const server = Bun.serve({
   port: process.env.FILE_SERVER_PORT || 3000,
