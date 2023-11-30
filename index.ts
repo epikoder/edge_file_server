@@ -115,7 +115,7 @@ const path = process.env.STORAGE_PATH || "storage";
 mkdir(path, (err) => {
   if (err && err.errno !== -17) {
     console.error(err);
-    exit(1);
+    // exit(1);
   }
 });
 
@@ -125,7 +125,7 @@ for (const d of dirs) {
   mkdir(path + d, (err) => {
     if (err && err.errno !== -17) {
       console.error(err);
-      exit(1);
+      // exit(1);
     }
   });
 }
