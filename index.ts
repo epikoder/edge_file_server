@@ -1,4 +1,4 @@
-import { mkdir, rm } from "fs";
+import { copyFileSync, mkdir, rm } from "fs";
 import { exit } from "process";
 
 const dir = () => (import.meta.dir.length === 0 ? "" : import.meta.dir + "/");
@@ -112,24 +112,26 @@ const _delete = async (rq: NodeFileRequest) => {
 };
 
 const path = process.env.STORAGE_PATH || "storage";
-mkdir(path, (err) => {
-  if (err && err.errno !== -17) {
-    console.error(err);
-    // exit(1);
-  }
-});
-
-console.log("STORAGE-DIR::", dir() + path);
-const dirs = ["/avatars", "/logo", "/questions"];
-for (const d of dirs) {
-  mkdir(path + d, (err) => {
+try {
+  mkdir(path, (err) => {
     if (err && err.errno !== -17) {
       console.error(err);
-      // exit(1);
     }
   });
+
+  console.log("STORAGE-DIR::", dir() + path);
+  const dirs = ["/avatars", "/logo", "/questions"];
+  for (const d of dirs) {
+    mkdir(path + d, (err) => {
+      if (err && err.errno !== -17) {
+        console.error(err);
+      }
+    });
+  }
+  console.log("STORAGE-SETUP-DONE");
+} catch (error) {
+  console.error(error);
 }
-console.log("STORAGE-SETUP-DONE");
 
 const server = Bun.serve({
   port: process.env.FILE_SERVER_PORT || 3000,
@@ -139,6 +141,7 @@ const server = Bun.serve({
         let arr = encodeURI(req.url).split("//");
         let path = arr.length === 1 ? arr[0] : arr[1];
         let file = path.slice(path.indexOf("/") + 1);
+        logger("[ Requested file:", req.url, "\t Got path:", file, " ]");
         return new Response(Bun.file(file));
       }
       case "POST": {

@@ -1,6 +1,12 @@
 const uri = "http://127.0.0.1:" + (process.env.FILE_SERVER_PORT || "3001");
 
-let test: NodeFileRequest["action"][] = ["copy", "write", "read", "remove"];
+let test: NodeFileRequest["action"][] = [
+  "copy",
+  "write",
+  "read",
+  "remove",
+  "copy",
+];
 const destination = "storage/logo/saved.txt";
 const file = "tmp/randomfile.txt";
 for (const t of test) {
@@ -24,3 +30,7 @@ for (const t of test) {
   const json = await res.json();
   console.log(t, json);
 }
+
+const res = await fetch(uri + "/" + destination);
+const text = await res.text();
+console.log(text,res.headers);
